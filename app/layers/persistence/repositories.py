@@ -11,8 +11,12 @@ def saveFavourite(image):
         return None
 
 def getAllFavourites(user):
-    favouriteList = Favourite.objects.filter(user=user).values('id', 'url', 'name', 'status', 'last_location', 'first_seen')
-    return list(favouriteList)
+    try:
+        favouriteList = Favourite.objects.filter(user=user).values('id', 'url', 'name', 'status', 'last_location', 'first_seen')
+        return list(favouriteList)
+    except Exception as e:
+        print(f"Error al obtener los favoritos: {e}")
+        return []
 
 def deleteFavourite(id):
     try:

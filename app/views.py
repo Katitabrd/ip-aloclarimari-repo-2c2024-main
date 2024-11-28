@@ -33,6 +33,9 @@ def login_page(request):
 def home(request):
     images = services.getAllImages()
     favourite_list = []
+    if request.user.is_authenticated:
+        #Si el usuario se logea, se obtienen los favoritos
+        favourite_list=services.getAllFavouritesByUser(request.user)
 
     return render(request, 'home.html', { 'images': images, 'favourite_list': favourite_list })
 
@@ -58,11 +61,25 @@ def getAllFavouritesByUser(request):
 
 @login_required
 def saveFavourite(request):
-    pass
+    if request.method=='POST':
+        image_name=request.POST.get('name')
+        image_url=request.POST.get('url')
+        image_status=request.POST.get('status')
+        image_last_location=request.POST.get('last_location')
+        image_first_seen=request.POST.get('first_seen')
+        #llamar al servicio de guardado
+        services.saveFavourite(request.user, image_name, image_url, image_status, image_last_location, image_first_seen)
+
+        return redirect('home') #redirige a la página principal
 
 @login_required
 def deleteFavourite(request):
-    pass
+    if request.method=='POST':
+        image_name=request.POST.get('name')
+        #llamar al servicio de eliminado
+        services.deleteFavourite(request.user, image_name)
+
+        return redirect('home')
 
 @login_required
 def exit(request):
