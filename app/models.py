@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+
 # Modelo para un favorito.
 class Favourite(models.Model):
     url = models.TextField()

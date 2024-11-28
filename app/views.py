@@ -3,11 +3,30 @@
 from django.shortcuts import redirect, render
 from .layers.services import services
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from app.layers.utilities.card import Card
 
 def index_page(request):
     return render(request, 'index.html')
+
+def login_page(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Autenticación del usuario
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            # Si el usuario es válido, lo autenticamos y redirigimos a la página principal
+            login(request, user)
+            return redirect('home')  # O la vista a la que desees redirigir al usuario
+
+        else:
+            # Si las credenciales son incorrectas
+            messages.error(request, 'Nombre de usuario o contraseña incorrectos.')
+            return redirect('login')  # Redirige de nuevo al formulario de login
 
 # esta función obtiene 2 listados que corresponden a las imágenes de la API y los favoritos del usuario, y los usa para dibujar el correspondiente template.
 # si el opcional de favoritos no está desarrollado, devuelve un listado vacío.
@@ -18,12 +37,15 @@ def home(request):
     return render(request, 'home.html', { 'images': images, 'favourite_list': favourite_list })
 
 def search(request):
-    search_msg = request.POST.get('query', '')
+    search_msg = request.POST.get('query', '').strip()
 
     # si el texto ingresado no es vacío, trae las imágenes y favoritos desde services.py,
     # y luego renderiza el template (similar a home).
     if (search_msg != ''):
-        pass
+        images=services.getAllImages()
+        filtered_images = [img for img in images if search_msg.lower() in img.name.lower()]
+        return render (request, 'search.html', {'images':filtered_images, 'query':search_msg})
+        
     else:
         return redirect('home')
 

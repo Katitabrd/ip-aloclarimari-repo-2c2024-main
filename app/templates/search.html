@@ -1,0 +1,84 @@
+{% extends 'header.html' %}
+
+{% block content %}
+<main>
+    
+    <div class="d-flex justify-content-end" style="margin-bottom: 1%; margin-right: 2rem;">
+        <nav aria-label="...">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link">⬅️</a>
+                </li>
+                <li class="page-item active" aria-current="page">
+                    <a class="page-link" href="#">1</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">2</a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">➡️</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="d-flex justify-content-center" style="margin-bottom: 1%">
+        <!-- Buscador del sitio -->
+        <form class="d-flex" action="{% url 'buscar' %}" method="POST">
+            {% csrf_token %}
+            <input class="form-control me-2" type="search" name="query" placeholder="Escribí otra palabra" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Buscar</button>
+        </form>
+    </div>
+    <h1>Resultados para: "{{ query }}"</h1>
+
+    <div class="gallery">
+        {% if images %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for img in images %}
+                    <div class="col">
+                        {% if img.status == 'Alive' %}
+                            <div class="card border-success mb-3 ms-5" style="max-width: 560rem;">
+                        {% elif img.status == 'Dead' %}
+                            <div class="card border-danger mb-3 ms-5" style="max-width:560rem;">
+                        {% else %}
+                            <div class="card border-warning mb-3 ms-5" style="max-width:560rem;">
+                        {% endif %}
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="{{ img.url }}" class="card-img-top" alt="imagen">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h3 class="card-title">{{ img.name }}</h3>
+                                        <p class="card-text">
+                                            <strong>
+                                                {% if img.status == 'Alive' %}
+                                                    🟢 {{ img.status }}
+                                                {% elif img.status == 'Dead' %}
+                                                    🔴 {{ img.status }}
+                                                {% else %}
+                                                    🟠 {{ img.status }}
+                                                {% endif %}
+                                            </strong>
+                                        </p>
+                                        <p class="card-text"><small class="text-body-secondary">Última ubicación: {{ img.last_location }}</small></p>
+                                        <p class="card-text"><small class="text-body-secondary">Episodio inicial: {{ img.first_seen }}</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <center> <h3><p>No se encontraron resultados para "{{ query }}".</p></h3></center>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <a href="{% url 'home' %}" class="btn btn-secondary">Volver a la galería</a>
+    </div>
+    <br><br><br>
+</main>
+{% endblock %}

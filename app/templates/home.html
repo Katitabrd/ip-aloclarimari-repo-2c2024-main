@@ -37,7 +37,13 @@
         <h2 class="text-center">La búsqueda no arrojó resultados...</h2>
         {% else %} {% for img in images %}
         <div class="col">
-            <div class="card mb-3 ms-5" style="max-width: 540px;">
+            {%if img.status == 'Alive'%}
+            <div class="card border-success mb-3 ms-5" style="max-width: 560rem;">
+                {%elif img.status == 'Dead'%}
+                <div class="card border-danger mb-3 ms-5" style="max-width:560rem;">
+                {%else%}
+                <div class="card border-warning mb-3 ms-5" style="max-width:560rem;">
+                {%endif%}
                 <div class="row g-0">
                     <div class="col-md-4">
                         <img src="{{ img.url }}" class="card-img-top" alt="imagen">
@@ -48,30 +54,9 @@
                             <h3 class="card-title">{{ img.name }}</h3>
                             <p class="card-text">
                                 <strong>
-                                            {% if true == 'Alive' %} 🟢 {{ img.status }} 
-                                            <div class="card border-success mb-3" style="max-width: 18rem;">
-                                                <div class="card-header">Header</div>
-                                                <div class="card-body text-success">
-                                                  <h5 class="card-title">Success card title</h5>
-                                                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                                </div>
-                                              </div>
-                                            {% elif true == 'Dead' %} 🔴 {{ img.status }}
-                                            <div class="card border-danger mb-3" style="max-width: 18rem;">
-                                                <div class="card-header">Header</div>
-                                                <div class="card-body text-danger">
-                                                  <h5 class="card-title">Danger card title</h5>
-                                                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                                </div>
-                                              </div> 
+                                            {% if img.status == 'Alive' %} 🟢 {{ img.status }}
+                                            {% elif img.status == 'Dead' %} 🔴 {{ img.status }}
                                             {% else %} 🟠 {{ img.status }} 
-                                            <div class="card border-warning mb-3" style="max-width: 18rem;">
-                                                <div class="card-header">Header</div>
-                                                <div class="card-body text-warning">
-                                                  <h5 class="card-title">Warning card title</h5>
-                                                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                                </div>
-                                              </div>
                                             {% endif %}
                                         </strong>
                             </p>
@@ -98,5 +83,6 @@
         </div>
         {% endfor %} {% endif %}
     </div>
+    <br><br><br>
 </main>
 {% endblock %}
