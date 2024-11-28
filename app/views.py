@@ -1,11 +1,12 @@
 # capa de vista/presentación
 
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from .layers.services import services
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from app.layers.utilities.card import Card
+from app.models import Favourite
 
 def index_page(request):
     return render(request, 'index.html')
@@ -97,7 +98,7 @@ def saveFavourite(request):
         return redirect('home') #redirige a la página principal
 
 @login_required
-def deleteFavourite(request):
+def deleteFavourite(request, favourite_id):
     if request.method=='POST':
         image_name=request.POST.get('name')
          # Validar que el nombre esté presente
@@ -106,14 +107,20 @@ def deleteFavourite(request):
             return redirect('home')
 
         # Llamar al servicio de eliminado
-        try:
-            services.deleteFavourite(request.user, image_name)
-            messages.success(request, "Favorito eliminado con éxito.")
-        except Exception as e:
-            messages.error(request, f"Error al eliminar el favorito: {str(e)}")
+    try:
+        # Obtener el objeto Favourite por ID y asegurarnos de que pertenece al usuario logueado
+        favourite = get_object_or_404(Favourite, id=favourite_id, user=request.user)
 
+        # Eliminar el favorito
+        favourite.delete()
+        messages.success(request, "Favorito eliminado con éxito.")
+    except Favourite.DoesNotExist:
+        messages.error(request, "No se encontró el favorito para eliminar.")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar el favorito: {str(e)}")
 
-        return redirect('home')
+    # Redirigir a la página de favoritos después de la eliminación
+    return redirect('home')
 
 @login_required
 def exit(request):
