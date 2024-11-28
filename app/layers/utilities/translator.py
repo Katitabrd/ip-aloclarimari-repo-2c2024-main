@@ -36,3 +36,16 @@ def fromRepositoryIntoCard(repo_dict):
                         first_seen=repo_dict['first_seen'],
                 )
     return card
+
+# Función para convertir un objeto Favourite en una Card
+def fromFavouriteToCard(favourite):
+    # Convierte el objeto Favourite en una Card usando sus atributos
+    card = Card(
+        id=favourite.id,  # Si necesitas el ID, pasas `favourite.id`
+        url=favourite.url,
+        name=favourite.name,
+        status=favourite.status,
+        last_location=favourite.last_location,
+        first_seen=favourite.first_seen
+    )
+    return card

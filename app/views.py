@@ -33,9 +33,12 @@ def login_page(request):
 def home(request):
     images = services.getAllImages()
     favourite_list = []
-    if request.user.is_authenticated:
-        #Si el usuario se logea, se obtienen los favoritos
-        favourite_list=services.getAllFavouritesByUser(request.user)
+    if not request.user.is_authenticated:
+        return render(request, 'home.html')
+    
+    user=request.user
+    #Si el usuario se logea, se obtienen los favoritos
+    favourite_list=services.getAllFavouritesByUser(user)
 
     return render(request, 'home.html', { 'images': images, 'favourite_list': favourite_list })
 
@@ -56,28 +59,59 @@ def search(request):
 # Estas funciones se usan cuando el usuario está logueado en la aplicación.
 @login_required
 def getAllFavouritesByUser(request):
-    favourite_list = []
+    favourite_list = services.getAllFavouritesByUser(request.user)
     return render(request, 'favourites.html', { 'favourite_list': favourite_list })
 
 @login_required
 def saveFavourite(request):
-    if request.method=='POST':
-        image_name=request.POST.get('name')
-        image_url=request.POST.get('url')
-        image_status=request.POST.get('status')
-        image_last_location=request.POST.get('last_location')
-        image_first_seen=request.POST.get('first_seen')
-        #llamar al servicio de guardado
-        services.saveFavourite(request.user, image_name, image_url, image_status, image_last_location, image_first_seen)
+    if request.method == 'POST':
+        # Obtener los datos del formulario
+        image_name = request.POST.get('name')
+        image_url = request.POST.get('url')
+        image_status = request.POST.get('status')
+        image_last_location = request.POST.get('last_location')
+        image_first_seen = request.POST.get('first_seen')
 
+        # Validar que todos los datos estén presentes
+        if not all([image_name, image_url, image_status, image_last_location, image_first_seen]):
+            messages.error(request, "Faltan datos para guardar el favorito.")
+            return redirect('home')
+
+        try:
+            # Llamar al servicio de guardado
+            services.saveFavourite(
+                user=request.user,
+                name=image_name,
+                url=image_url,
+                status=image_status,
+                last_location=image_last_location,
+                first_seen=image_first_seen
+            )
+
+            # Mensaje de éxito
+            messages.success(request, "Favorito guardado con éxito.")
+        except Exception as e:
+            # Si ocurre un error
+            messages.error(request, f"Error al guardar el favorito: {str(e)}")
+        
         return redirect('home') #redirige a la página principal
 
 @login_required
 def deleteFavourite(request):
     if request.method=='POST':
         image_name=request.POST.get('name')
-        #llamar al servicio de eliminado
-        services.deleteFavourite(request.user, image_name)
+         # Validar que el nombre esté presente
+        if not image_name:
+            messages.error(request, "No se especificó el nombre del favorito a eliminar.")
+            return redirect('home')
+
+        # Llamar al servicio de eliminado
+        try:
+            services.deleteFavourite(request.user, image_name)
+            messages.success(request, "Favorito eliminado con éxito.")
+        except Exception as e:
+            messages.error(request, f"Error al eliminar el favorito: {str(e)}")
+
 
         return redirect('home')
 

@@ -3,9 +3,10 @@
 from ..persistence import repositories
 from ..utilities import translator
 from django.contrib.auth import get_user
+from django.http import HttpRequest
 from ..transport import transport
 from app.models import Favourite
-
+from ...layers.services import services
 def getAllImages(input=None):
     # obtiene un listado de datos "crudos" desde la API, usando a transport.py.
     json_collection = transport.getAllImages(input)
@@ -20,35 +21,24 @@ def getAllImages(input=None):
     return images
 
 # añadir favoritos (usado desde el template 'home.html')
-def saveFavourite(request):
-    #obtener los datos
-    image_name=request.POST.get('name')
-    image_url = request.POST.get('url')
-    image_status = request.POST.get('status')
-    image_last_location = request.POST.get('last_location')
-    image_first_seen = request.POST.get('first_seen')
+def saveFavourite(user, name, url, status, last_location, first_seen):
+    # Crear un nuevo objeto Favourite y guardarlo en la base de datos
+    fav = Favourite(
+        user=user,  # Usa el usuario autenticado directamente
+        name=name,
+        url=url,
+        status=status,
+        last_location=last_location,
+        first_seen=first_seen
+    )
+    fav.save()  # Guarda el objeto en la base de datos
 
-    #asignar usuario logeado
-    user=request.user
-
-    # Crear un nuevo favorito para este usuario
-    fav = {
-        'name': image_name,
-        'url': image_url,
-        'status': image_status,
-        'last_location': image_last_location,
-        'first_seen': image_first_seen,
-        'user': user
-    }
-
-    return repositories.saveFavourite(fav) # lo guardamos en la base.
+    return fav
+    
 
 # usados desde el template 'favourites.html'
-def getAllFavouritesByUser(request):
-    if not request.user.is_authenticated:
-        return []
-    #obtener user logeado
-    user=request.user
+def getAllFavouritesByUser(user):
+    
 
     favourite_list = Favourite.objects.filter(user=user) # buscamos desde el repositories.py TODOS los favoritos del usuario (variable 'user').
     mapped_favourites = []
