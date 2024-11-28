@@ -72,7 +72,13 @@
                 {% endfor %}
             </div>
         {% else %}
-            <center> <h3><p>No se encontraron resultados para "{{ query }}".</p></h3></center>
+            <center> <h3><p>No se encontraron resultados para "{{ query }}".</p></h3>
+                <div class="preloader-wrapper">
+                    <div class="spinner-border" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    </div></center>
+                    <br>
         {% endif %}
     </div>
 
